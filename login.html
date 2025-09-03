@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimuPhysics Login</title>
+  <link rel="stylesheet" href="login.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <h1 class="title">SimuPhysics</h1>
+      <div id="choice-screen">
+        <button class="option-btn" onclick="showLogin()">Login</button>
+        <button class="option-btn" onclick="showSignup()">Create Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="hidden">
+        <h2>Login</h2>
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Password" required>
+        <button type="submit">Login</button>
+        <p class="switch" onclick="backToChoice()">← Back</p>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signup-form" class="hidden">
+        <h2>Create Account</h2>
+        <input type="text" id="signup-name" placeholder="Name" required>
+        <input type="email" id="signup-email" placeholder="Email" required>
+        <input type="password" id="signup-password" placeholder="Password" required>
+        <ul id="password-rules">
+          <li id="rule-length"> At least 8 characters</li>
+          <li id="rule-upper"> At least one uppercase letter</li>
+          <li id="rule-number">At least one number</li>
+          <li id="rule-symbol"> At least one special character</li>
+        </ul>
+        <button type="submit">Sign Up</button>
+        <p class="switch" onclick="backToChoice()">← Back</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function showLogin() {
+      document.getElementById("choice-screen").classList.add("hidden");
+      document.getElementById("login-form").classList.remove("hidden");
+    }
+
+    function showSignup() {
+      document.getElementById("choice-screen").classList.add("hidden");
+      document.getElementById("signup-form").classList.remove("hidden");
+    }
+
+    function backToChoice() {
+      document.getElementById("login-form").classList.add("hidden");
+      document.getElementById("signup-form").classList.add("hidden");
+      document.getElementById("choice-screen").classList.remove("hidden");
+    }
+
+    // Password validation (live update for signup)
+    const signupPassword = document.getElementById("signup-password");
+    signupPassword?.addEventListener("input", () => {
+      const value = signupPassword.value;
+      document.getElementById("rule-length").textContent = 
+        (value.length >= 8 ? "✅" : "") + " At least 8 characters";
+      document.getElementById("rule-upper").textContent = 
+        (/[A-Z]/.test(value) ? "✅" : "") + " At least one uppercase letter";
+      document.getElementById("rule-number").textContent = 
+        (/\d/.test(value) ? "✅" : "") + " At least one number";
+      document.getElementById("rule-symbol").textContent = 
+        (/[^A-Za-z0-9]/.test(value) ? "✅" : "") + " At least one special character";
+    });
+
+    // Handle login
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+
+      const res = await fetch(`${API_BASE}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+});
+
+
+      if (res.ok) {
+        window.location.href = "index1.html";
+      } else {
+        alert(await res.text());
+      }
+    });
+
+    // Handle signup
+    document.getElementById("signup-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("signup-name").value;
+      const email = document.getElementById("signup-email").value;
+      const password = document.getElementById("signup-password").value;
+
+      // Local check before sending
+      const strongPassword = 
+        password.length >= 8 &&
+        /[A-Z]/.test(password) &&
+        /\d/.test(password) &&
+        /[^A-Za-z0-9]/.test(password);
+
+      if (!strongPassword) {
+        alert("Password must be at least 8 characters, include an uppercase letter, a number, and a special character.");
+        return;
+      }
+
+      const API_BASE = "http://localhost:5000";
+      const res = await fetch(`${API_BASE}/api/register`, {
+        method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+});
+
+      if (res.ok) {
+        window.location.href = "index1.html";
+      } else {
+        alert(await res.text());
+      }
+    });
+  </script>
+</body>
+</html>

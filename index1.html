@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimuPhysics</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <button class="new-chat" title="New Chat">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- Website Header -->
+      <header class="site-header">
+        <span>SimuPhysics</span>
+
+        <!-- 🔹 User Menu (top-right corner) -->
+        <div class="user-menu">
+          <button id="user-dropdown">
+            <span id="user-icon">?</span>
+            <span id="user-name"></span>
+            ▼
+          </button>
+          <div id="dropdown-content" class="hidden">
+            <div class="dropdown-item">
+              <span id="dropdown-icon">?</span> 
+              <span id="dropdown-name"></span>
+            </div>
+            <button id="logout-btn">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Search bar -->
+      <div class="search-container centered" id="search-area">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Type your question here">
+          <button id="search-button">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Simulation section (hidden initially) -->
+      <div class="content hidden" id="simulation-content">
+        <div class="simulation-container" id="simulation-placeholder">
+          <!-- p5.js canvas injected here -->
+        </div>
+
+        <!-- Play/Pause button -->
+        <div class="controls">
+          <button id="toggle-btn">
+            <i class="fa-solid fa-pause"></i> Pause
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="matter.js"></script>
+  <script src="p5.js"></script>
+  <script src="new.js"></script>
+  <script src="script.js"></script>
+
+  <!-- 🔹 User Menu Script -->
+  <script>
+    async function loadUser() {
+      const res = await fetch("/api/me");
+      const data = await res.json();
+      if (!data.loggedIn) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const user = data.user;
+      const firstLetter = user.name[0].toUpperCase();
+
+      document.getElementById("user-name").textContent = user.name;
+      document.getElementById("user-icon").textContent = firstLetter;
+      document.getElementById("dropdown-name").textContent = user.name;
+      document.getElementById("dropdown-icon").textContent = firstLetter;
+    }
+
+    document.getElementById("user-dropdown").addEventListener("click", () => {
+      document.getElementById("dropdown-content").classList.toggle("hidden");
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await fetch("/api/logout", { method: "POST" });
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+    });
+
+    loadUser();
+  </script>
+</body>
+</html>
